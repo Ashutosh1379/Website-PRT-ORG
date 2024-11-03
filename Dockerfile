@@ -1,5 +1,3 @@
-FROM ubuntu
-RUN apt update
-RUN apt-get install apache2 -y
-ADD . /var/www/html
-ENTRYPOINT apachectl -D FOREGROUND
+FROM php:7.4-apache
+COPY . /var/www/html/
+
