@@ -1,0 +1,53 @@
+
+pipeline{
+    agent none
+    environment {
+        DOCKERHUB_CREDENTIALS=credentials('9920aee8-ce2c-4a66-ab5d-bc020f11e160')
+    }
+    
+    stages{
+        stage('Hello'){
+            agent{ 
+                label 'k8s-master'
+            }
+            steps{
+                echo 'Hello World'
+            }
+        }
+        stage('git'){
+            agent{ 
+                label 'k8s-master'
+            }
+
+            steps{
+
+                git'https://github.com/Ashutosh1379/Website-PRT-ORG.git'
+            }
+        }
+        stage('docker') {
+            agent { 
+                label 'k8s-master'
+            }
+
+            steps {
+
+                sh 'sudo docker build . -t ashutosh1379/projectimage'
+                sh 'sudo echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                sh 'sudo docker push ashutosh1379/projectimage'
+
+            }
+        }
+        stage('Kubernetes') {
+            agent { 
+                label 'k8s-master'
+            }
+
+            steps {
+
+                sh 'kubectl create -f deployment.yaml'
+                sh 'kubectl create -f svc.yaml'
+            }
+        }        
+        
+    }
+}
